@@ -1,7 +1,20 @@
+#include "../../libspongent/config.h"
+
 enclave {
 	
 	trusted {
-        public int enclave_dummy_call(void);
+        public int ecall_wrap(   [in, size=body_len] void *body, int body_len,
+                                 [in, size=ad_len] void *ad, int ad_len,
+                                 [out, size=body_len] void *cipher,
+                                 [out, size=SPONGENT_TAG_SIZE] void *tag);
+
+        public int ecall_unwrap( [in, size=cipher_len] void *cipher, int cipher_len,
+                                 [in, size=ad_len] void *ad, int ad_len,
+                                 [out, size=cipher_len] void *body,
+                                 [in, size=SPONGENT_TAG_SIZE] void *expected_tag);
+
+        public int ecall_mac(    [in, size=msg_len] void *msg, int msg_len,
+                                 [out, size=SPONGENT_TAG_SIZE] void* mac);
     };
 	
 	untrusted {

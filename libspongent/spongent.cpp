@@ -41,13 +41,6 @@ int  sBoxLayer[256] = {
 
 //--------------------------------------------------------------------------------------------
 
-//XXX
-
-int libspongent_test(int i)
-{
-    return i+1;
-}
-
 void PrintState(hashState *state)
 {
 	int i;

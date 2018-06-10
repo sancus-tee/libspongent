@@ -19,8 +19,20 @@
  */
 
 #include <stdio.h>
+#include <stdint.h>
 #include <sgx_urts.h>
 #include "Enclave/encl_u.h"
+
+#include "../libspongent/config.h" //XXX
+
+#define ASSERT(cond)                                                    \
+    do {                                                                \
+        if (!(cond))                                                    \
+        {                                                               \
+            perror("[" __FILE__ "] assertion '" #cond "' failed");      \
+            abort();                                                    \
+        }                                                               \
+    } while(0)
 
 #define SGX_ASSERT(f)  { if ( SGX_SUCCESS != (enclave_rv = (f)) )       \
  {                                                                      \
@@ -31,10 +43,23 @@
 
 int enclave_rv = 0;
 
+void dump_hex(char *str, uint8_t *buf, int len)
+{
+    printf("%s = ", str);
+    for (int i=0; i < len; i++)
+        printf("%02x ", *(buf + i));
+    printf("\n");
+}
+
+char *msg = "hello, world!";
+uint8_t *cipher, *plain;
+uint8_t tag[SPONGENT_TAG_SIZE] = {0x0};
+uint8_t mac[SPONGENT_TAG_SIZE] = {0x0};
+
 int main( int argc, char **argv )
 {
 	sgx_launch_token_t token = {0};
-	int updated = 0, rv = 0;
+	int updated = 0, rv = 0, msg_len = 0;
     sgx_enclave_id_t eid = 0;
 
    	printf("Creating enclave...\n");
@@ -42,10 +67,30 @@ int main( int argc, char **argv )
                                     &token, &updated, &eid, NULL ) );
 
     printf("calling enclave..\n");
-    SGX_ASSERT( enclave_dummy_call(eid, &rv) );
 
-    printf("returned %d; destroying enclave..\n", rv);
+    msg_len = strlen(msg);
+    cipher  = malloc(msg_len);
+    plain   = malloc(msg_len);
+    memset(cipher, 0x0, msg_len);
+    memset(plain, 0x0, msg_len);
+
+    SGX_ASSERT( ecall_wrap(eid, &rv, msg, msg_len, NULL, 0, cipher, tag) );
+    ASSERT(!rv && "wrap failed");
+    dump_hex("MSG   ", msg, msg_len);
+    dump_hex("CIPHER", cipher, msg_len);
+    dump_hex("TAG   ", tag, SPONGENT_TAG_SIZE);
+
+    SGX_ASSERT( ecall_unwrap(eid, &rv, cipher, msg_len, NULL, 0, plain, tag) );
+    ASSERT(!rv && "unwrap failed");
+    dump_hex("PLAIN ", plain, msg_len);
+
+    SGX_ASSERT( ecall_mac(eid, &rv, msg, msg_len, mac) );
+    ASSERT(!rv && "mac failed");
+    dump_hex("MAC   ", mac, SPONGENT_TAG_SIZE);
+
+    printf("destroying enclave..\n");
    	SGX_ASSERT( sgx_destroy_enclave( eid ) );
+    free(cipher);
 
     printf("all is well; exiting..\n");
 	return 0;

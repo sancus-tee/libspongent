@@ -2,6 +2,8 @@
 #define _SPONGENT_H_
 
 #include "config.h"
+static_assert((SPONGENT_TAG_SIZE == (SPONGENT_SECURITY / 8)), "Incorrect SPONGENT security parameter configuration");
+static_assert((SPONGENT_KEY_SIZE == (SPONGENT_SECURITY / 8)), "Incorrect SPONGENT security parameter configuration");
 
 #include <cstdint>
 
@@ -110,8 +112,7 @@ HashReturn Absorb(hashState *state, const BitSequence *data, DataLength databitl
 HashReturn Squeeze(hashState *state);
 HashReturn Pad(hashState *state);
 
-// XXX create pure C wrappers for desired libspongent functionality
-extern "C" int libspongent_test(int i);
+int libspongent_test(int i);
 
 int Pi(int i);
 void pLayer(hashState *state);
