@@ -4,7 +4,7 @@
 /**
  * The number of bits security offered by the crypto functions
  */
-#define SPONGENT_SECURITY 64
+#define SPONGENT_SECURITY 128
 
 /**
  * The size of the keys used by the crypto functions: (SPONGENT_SECURITY / 8)
@@ -13,7 +13,7 @@
  *       artithmetic operations. We rely on a static assertion in spongent.h to
  *       ensure correctness.
  */
-#define SPONGENT_KEY_SIZE 8
+#define SPONGENT_KEY_SIZE 16
 
 /**
  * The size of the tags used and produces by the crypto functions.

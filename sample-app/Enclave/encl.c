@@ -19,22 +19,20 @@
  */
 
 #include "libspongent/spongewrap.h"
-#include <stdint.h>
 
-uint64_t key = 0xdeadbeefcafebabe;
-uint8_t mac[SPONGENT_TAG_SIZE] = {0x0};
+spongent_key_t key = { .quads = {0xdeadbeefcafebabe, 0xc0defeeddefec8ed} };
 
 int ecall_wrap(void *body, int body_len, void *ad, int ad_len, void *cipher, void *tag)
 {
-    return spongent_wrap(&key, ad, ad_len, body, body_len, cipher, tag);
+    return spongent_wrap(key, ad, ad_len, body, body_len, cipher, tag);
 }
 
 int ecall_unwrap(void *cipher, int cipher_len, void *ad, int ad_len, void *body, void *expected_tag)
 {
-    return spongent_unwrap(&key, ad, ad_len, cipher, cipher_len, body, expected_tag);
+    return spongent_unwrap(key, ad, ad_len, cipher, cipher_len, body, expected_tag);
 }
 
 int ecall_mac(void *msg, int msg_len, void *mac)
 {
-    return spongent_mac(&key, msg, msg_len, mac);
+    return spongent_mac(key, msg, msg_len, mac);
 }
