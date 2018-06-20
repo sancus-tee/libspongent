@@ -8,13 +8,6 @@
 extern "C" {
 #endif
 
-typedef union {
-    uint8_t  bytes[SPONGENT_TAG_SIZE];
-    uint16_t words[SPONGENT_TAG_SIZE/2];
-    uint32_t doubles[SPONGENT_TAG_SIZE/4];
-    uint64_t quads[SPONGENT_TAG_SIZE/8];
-} spongent_key_t;
-
 /**
  * Wrap a message using the SPONGEWRAP authenticated encryption.
  *
@@ -40,17 +33,17 @@ typedef union {
  *
  * @return 0 iff the wrapping succeeded.
  */
-int spongent_wrap(   spongent_key_t key,
+int spongent_wrap(   void* key,
                      void* ad, unsigned int ad_len,
                      void* body, unsigned int body_len,
                      void* cipher, void* tag);
 
-int spongent_unwrap( spongent_key_t key,
+int spongent_unwrap( void* key,
                      void* ad, unsigned int ad_len,
                      void* cipher, unsigned int cipher_len,
                      void* body, void* tag);
 
-int spongent_mac(    spongent_key_t key,
+int spongent_mac(    void* key,
                      void* msg, unsigned int msg_len,
                      void* mac);
 
